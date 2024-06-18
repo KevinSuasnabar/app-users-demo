@@ -1,0 +1,65 @@
+version: '3.7'
+
+services:
+  mysql8:
+    container_name: mysql8
+    image: mysql:8
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: sasa
+      MYSQL_DATABASE: users_db
+    volumes:
+      - data-mysql:/var/lib/mysql
+    restart: always
+    networks:
+      - spring
+
+  users-service:
+    container_name: users-service
+    image: ksuasnabar/users:latest
+    #    build:
+#      context: ./
+#      dockerfile: ./Dockerfile
+    ports:
+      - "8050:8050"
+    environment:
+      PORT: 8050
+      DB_HOST: mysql8:3306
+      DB_DATABASE: users_db
+      DB_USERNAME: root
+      DB_PASSWORD: sasa
+      MOVIES_SERVICE_URL: ec2-34-239-245-228.compute-1.amazonaws.com:8040
+    networks:
+      - spring
+    depends_on:
+      - mysql8
+    restart: always
+
+
+
+volumes:
+  data-mysql:
+    name: data-mysql
+
+networks:
+  spring:
+    external: true
+
+
+#services:
+#  dev:
+#    image: postgres:latest
+#    restart: always
+#    container_name: my_container_name
+#    hostname: myhost
+#    environment:
+#      POSTGRES_DB: movies_db
+#      POSTGRES_USER: admin
+#      POSTGRES_PASSWORD: admin
+#    volumes:
+#      - D:/java/postgres-volumes/moviesappdata1:/var/lib/postgresql/data
+#      - ./src/main/resources/create_schema.sql:/docker-entrypoint-initdb.d/create_schema.sql
+#      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql
+#    ports:
+#      - "5432:5432"
